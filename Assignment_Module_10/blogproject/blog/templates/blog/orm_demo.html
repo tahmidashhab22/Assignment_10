@@ -1,0 +1,31 @@
+{% extends 'blog/base.html' %}
+{% block title %}Advanced ORM Query Demo{% endblock %}
+{% block content %}
+<h1 class="mb-4">Advanced ORM Query Demo</h1>
+<p class="text-muted">This page exists to demonstrate the required field lookups, related-object lookups, and aggregations (Sections 9 &amp; 10) live against the database.</p>
+
+<div class="card mb-4"><div class="card-body">
+    <h5>Site-wide aggregates</h5>
+    <ul class="mb-0">
+        <li>Total posts: {{ site_stats.total_posts }}</li>
+        <li>Total comments: {{ site_stats.total_comments }}</li>
+        <li>Total likes: {{ site_stats.total_likes }}</li>
+        <li>Average rating (site-wide): {{ site_stats.avg_rating_site_wide|floatformat:2|default:"n/a" }}</li>
+        <li>Min rating given: {{ site_stats.min_rating|default:"n/a" }}</li>
+        <li>Max rating given: {{ site_stats.max_rating|default:"n/a" }}</li>
+    </ul>
+</div></div>
+
+{% for label, qs in examples.items %}
+<div class="card mb-3"><div class="card-body">
+    <h6>{{ label }}</h6>
+    <ul class="mb-0">
+        {% for post in qs %}
+        <li><a href="{% url 'post_detail' post.pk %}">{{ post.title }}</a> &mdash; {{ post.author.username }}</li>
+        {% empty %}
+        <li class="text-muted">No matches.</li>
+        {% endfor %}
+    </ul>
+</div></div>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends 'blog/base.html' %}
+{% block title %}Popular Posts{% endblock %}
+{% block content %}
+<h1 class="mb-4">Popular Posts</h1>
+<p class="text-muted">Ranked by likes, then comments, then average rating &mdash; entirely via <code>annotate()</code> and <code>order_by()</code>, no Python-side sorting.</p>
+<ol class="list-group list-group-numbered">
+    {% for post in posts %}
+    <li class="list-group-item d-flex justify-content-between align-items-start">
+        <div class="ms-2 me-auto">
+            <a href="{% url 'post_detail' post.pk %}" class="fw-bold">{{ post.title }}</a>
+            <div class="text-muted small">by {{ post.author.username }}</div>
+        </div>
+        <span class="badge bg-primary badge-stat">{{ post.like_count }} likes</span>
+        <span class="badge bg-info text-dark badge-stat">{{ post.comment_count }} comments</span>
+        {% if post.avg_rating %}<span class="badge bg-warning text-dark">{{ post.avg_rating|floatformat:1 }}/5</span>{% endif %}
+    </li>
+    {% empty %}
+    <li class="list-group-item">No posts yet.</li>
+    {% endfor %}
+</ol>
+{% endblock %}

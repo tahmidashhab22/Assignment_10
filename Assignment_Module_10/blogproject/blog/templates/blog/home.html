@@ -1,0 +1,43 @@
+{% extends 'blog/base.html' %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<h1 class="mb-4">Latest Posts</h1>
+<div class="row">
+    {% for post in page_obj %}
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title"><a href="{% url 'post_detail' post.pk %}">{{ post.title }}</a></h5>
+                <p class="text-muted mb-1">
+                    by <a href="{% url 'profile' post.author.username %}">{{ post.author.username }}</a>
+                    {% if post.category %} in <span class="badge bg-secondary">{{ post.category.name }}</span>{% endif %}
+                    &middot; {{ post.created_at|date:"M d, Y" }}
+                </p>
+                <p class="card-text">{{ post.content|truncatewords:25 }}</p>
+                <span class="badge bg-primary badge-stat">{{ post.like_count }} likes</span>
+                <span class="badge bg-info text-dark badge-stat">{{ post.comment_count }} comments</span>
+                {% if post.avg_rating %}
+                <span class="badge bg-warning text-dark badge-stat">{{ post.avg_rating|floatformat:1 }} / 5</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <p>No posts yet. <a href="{% url 'post_create' %}">Write the first one</a>.</p>
+    {% endfor %}
+</div>
+
+{% if page_obj.has_other_pages %}
+<nav>
+    <ul class="pagination">
+        {% if page_obj.has_previous %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+        {% endif %}
+        <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+        {% if page_obj.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,74 @@
+{% extends 'blog/base.html' %}
+{% block title %}{{ post.title }}{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <h1>{{ post.title }}</h1>
+        <p class="text-muted">
+            by <a href="{% url 'profile' post.author.username %}">{{ post.author.username }}</a>
+            {% if post.category %} in <span class="badge bg-secondary">{{ post.category.name }}</span>{% endif %}
+            &middot; {{ post.created_at|date:"M d, Y H:i" }}
+        </p>
+        <p style="white-space: pre-line;">{{ post.content }}</p>
+
+        {% if user == post.author %}
+        <a href="{% url 'post_update' post.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+        <a href="{% url 'post_delete' post.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
+        {% endif %}
+
+        <hr>
+        <div class="d-flex align-items-center flex-wrap gap-3">
+            {% if user.is_authenticated %}
+            <a href="{% url 'toggle_like_post' post.pk %}" class="btn btn-sm {% if user_liked %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                {% if user_liked %}Unlike{% else %}Like{% endif %} ({{ post.like_count }})
+            </a>
+            {% else %}
+            <span class="badge bg-primary">{{ post.like_count }} likes</span>
+            {% endif %}
+
+            <span class="star-rating">
+                {% if post.avg_rating %}★★★★★ {{ post.avg_rating|floatformat:1 }} / 5{% else %}No ratings yet{% endif %}
+            </span>
+            <span class="text-muted small">Total Ratings: {{ post.rating_count }}</span>
+        </div>
+
+        {% if user.is_authenticated %}
+        <form method="post" action="{% url 'rate_post' post.pk %}" class="d-flex align-items-center gap-2 mt-2">
+            {% csrf_token %}
+            {{ rating_form.rating }}
+            <button class="btn btn-sm btn-warning" type="submit">
+                {% if user_rating %}Update Rating{% else %}Rate this post{% endif %}
+            </button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+
+<h3 class="mt-4">Comments ({{ post.comment_count }})</h3>
+
+{% if user.is_authenticated %}
+<form method="post" action="{% url 'add_comment' post.pk %}" class="mb-4">
+    {% csrf_token %}
+    {{ comment_form.content }}
+    <button class="btn btn-primary btn-sm mt-2" type="submit">Post Comment</button>
+</form>
+{% else %}
+<p><a href="{% url 'login' %}">Log in</a> to comment.</p>
+{% endif %}
+
+{% for comment in comments %}
+    {% include 'blog/comment_thread.html' with comment=comment %}
+{% empty %}
+<p class="text-muted">No comments yet. Be the first to comment.</p>
+{% endfor %}
+
+<script>
+document.addEventListener('click', function (e) {
+    if (e.target.classList.contains('reply-toggle') || e.target.classList.contains('edit-toggle')) {
+        e.preventDefault();
+        var el = document.getElementById(e.target.dataset.target);
+        if (el) { el.style.display = (el.style.display === 'none' || !el.style.display) ? 'block' : 'none'; }
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,41 @@
+<div class="comment {% if comment.is_reply %}reply-block{% endif %}" id="comment-{{ comment.pk }}">
+    <p class="mb-1">
+        <strong>{{ comment.author.username }}</strong>
+        <span class="text-muted small">{{ comment.created_at|date:"M d, Y H:i" }}</span>
+        {% if comment.is_edited %}<span class="text-muted small">(edited)</span>{% endif %}
+    </p>
+    <p>{{ comment.content }}</p>
+    <div class="small mb-2">
+        <a href="{% url 'toggle_like_comment' comment.pk %}" class="me-2">
+            👍 Like ({{ comment.like_count|default:comment.likes.count }})
+        </a>
+        {% if user.is_authenticated %}
+        <a href="#" class="me-2 reply-toggle" data-target="reply-form-{{ comment.pk }}">Reply</a>
+        {% endif %}
+        {% if user == comment.author %}
+        <a href="#" class="me-2 edit-toggle" data-target="edit-form-{{ comment.pk }}">Edit</a>
+        <a href="{% url 'delete_comment' comment.pk %}" class="text-danger"
+           onclick="return confirm('Delete this comment?');">Delete</a>
+        {% endif %}
+    </div>
+
+    {% if user == comment.author %}
+    <form method="post" action="{% url 'edit_comment' comment.pk %}" id="edit-form-{{ comment.pk }}" style="display:none;" class="mb-2">
+        {% csrf_token %}
+        <textarea name="content" class="form-control form-control-sm mb-1" rows="2">{{ comment.content }}</textarea>
+        <button class="btn btn-sm btn-primary" type="submit">Save</button>
+    </form>
+    {% endif %}
+
+    {% if user.is_authenticated %}
+    <form method="post" action="{% url 'add_reply' comment.pk %}" id="reply-form-{{ comment.pk }}" style="display:none;" class="mb-2">
+        {% csrf_token %}
+        <textarea name="content" class="form-control form-control-sm mb-1" rows="2" placeholder="Write a reply..."></textarea>
+        <button class="btn btn-sm btn-outline-primary" type="submit">Reply</button>
+    </form>
+    {% endif %}
+
+    {% for reply in comment.replies.all %}
+        {% include 'blog/comment_thread.html' with comment=reply %}
+    {% endfor %}
+</div>

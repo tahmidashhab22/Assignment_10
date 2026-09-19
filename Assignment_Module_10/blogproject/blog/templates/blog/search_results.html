@@ -1,0 +1,28 @@
+{% extends 'blog/base.html' %}
+{% block title %}Search{% endblock %}
+{% block content %}
+<h1 class="mb-4">Search Posts</h1>
+<form method="get" class="row g-2 mb-4">
+    <div class="col-auto">{{ form.q }}</div>
+    <div class="col-auto">{{ form.category }}</div>
+    <div class="col-auto"><button class="btn btn-primary" type="submit">Search</button></div>
+</form>
+
+{% if query %}<p>Results for "<strong>{{ query }}</strong>"</p>{% endif %}
+
+<div class="row">
+{% for post in posts %}
+    <div class="col-md-6">
+        <div class="card"><div class="card-body">
+            <h5><a href="{% url 'post_detail' post.pk %}">{{ post.title }}</a></h5>
+            <p class="text-muted mb-1">by {{ post.author.username }}{% if post.category %} &middot; {{ post.category.name }}{% endif %}</p>
+            <p>{{ post.content|truncatewords:20 }}</p>
+            <span class="badge bg-primary badge-stat">{{ post.like_count }} likes</span>
+            <span class="badge bg-info text-dark badge-stat">{{ post.comment_count }} comments</span>
+        </div></div>
+    </div>
+{% empty %}
+    <p>No posts matched your search.</p>
+{% endfor %}
+</div>
+{% endblock %}
